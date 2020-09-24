@@ -30,14 +30,14 @@ def read():
     column_data = requests.get(base_url.format('boards') + '/' + board_id + '/lists', params = auth_params).json()
     for column in column_data:
         task_data = requests.get(base_url.format('lists') + '/' + column['id'] + '/cards', params=auth_params).json()
-        print(f'"{column["name"]}" list. Number of tasks - {len(task_data)}')
+        print(f'"{column["name"]}" list with ID: "{column["id"]}". Number of tasks - {len(task_data)}')
         tasks_counter = 0
         if not task_data:
             print(f'\tTasks is absent')
             continue
         for task in task_data:
             tasks_counter += 1
-            print(f'\t{tasks_counter}. {task["name"]}')
+            print(f'\t{tasks_counter}. "{task["name"]}" with ID: "{task["id"]}"')
 
 def create_list(name):
     """
