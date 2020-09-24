@@ -68,7 +68,6 @@ def create_task(name, column_name):
 
     if len(column_list) == 1:
         requests.post(base_url.format('cards'), data={'name': name, 'idList': column_list[0]['id'], **auth_params})
-        """break"""
     else:
         counter = 0
         print('All lists with the same name:')
