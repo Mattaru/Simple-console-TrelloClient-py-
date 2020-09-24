@@ -76,7 +76,7 @@ def create_task(name, column_name):
             counter += 1
             print(f'{counter} - List: "{column["name"]}" with ID: "{column["id"]}"')
         answer_number = int(input('Choose number of list, where do you want add the new task:\n'))
-        while answer_number not in range(len(column_list) + 1):
+        while answer_number not in range(1, len(column_list) + 1):
             answer_number = int(input('The list with this number is not exist, choose a correct number:\n'))
         requests.post(base_url.format('cards'), data={'name': name, 'idList': column_list[answer_number - 1]['id'], **auth_params})
 
@@ -162,10 +162,29 @@ def move(name, column_name):
     else:
         task_id = tasks_list[0]['id']
 
+    column_list = []
+
     for column in column_data:
         if column['name'] == column_name:
-            requests.put(base_url.format('cards') + '/' + task_id + '/idList', data={'value': column['id'], **auth_params})
-            break
+            column_list.append({
+                'name': column['name'],
+                'id': column['id']
+            })
+
+    if len(column_list) > 1:
+        print('The lists with the same name:')
+        counter = 0
+        for column in column_list:
+            counter += 1
+            print(f'{counter} - Name: "{column["name"]}". ID: "{column["id"]}".')
+        answer_number = int(input('Choose number of list, where do you want move the task:\n'))
+        while answer_number not in range(1, len(column_list) + 1):
+            answer_number = int(input('Number of list is incorrect. Try again:\n'))
+        requests.put(base_url.format('cards') + '/' + task_id + '/idList', data={'value': column_list[answer_number - 1]['id'], **auth_params})
+    elif len(column_list) == 1:
+        requests.put(base_url.format('cards') + '/' + task_id + '/idList', data={'value': column_list[0]['id'], **auth_params})
+    else:
+        print('List with those name is not exist')
 
 def choose_task(dict):
     """
@@ -175,7 +194,7 @@ def choose_task(dict):
     for task in dict:
         counter += 1
         print(f'{counter} - Task "{task["name"]}"\n    from the "{task["list_name"]}" list\n    with "id" - {task["id"]}')
-    number_of_task = int(input('Choose the number of tusk, that you want to move: '))
+    number_of_task = int(input('Choose the number of tusk, that you want to move:\n '))
     return dict[number_of_task - 1]['id']
 
 if __name__ == '__main__':
