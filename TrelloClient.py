@@ -30,7 +30,7 @@ def read():
     column_data = requests.get(base_url.format('boards') + '/' + board_id + '/lists', params = auth_params).json()
     for column in column_data:
         task_data = requests.get(base_url.format('lists') + '/' + column['id'] + '/cards', params=auth_params).json()
-        print(f'"{column["name"]}" list with ID: "{column["id"]}". Number of tasks - {len(task_data)}')
+        print(f'"{column["name"]}". Number of tasks - {len(task_data)}')
         tasks_counter = 0
         if not task_data:
             print(f'\tTasks is absent')
@@ -48,6 +48,7 @@ def create_list(name):
     board = requests.get(base_url.format('boards') + '/' + board_id, params=auth_params).json()
     our_board_id = board['id']
     requests.post(base_url.format('lists'), data={'name': name, 'idBoard': our_board_id, **auth_params})
+    print('The list has been created.')
 
 def create_task(name, column_name):
     """
@@ -68,7 +69,8 @@ def create_task(name, column_name):
 
     if len(column_list) == 1:
         requests.post(base_url.format('cards'), data={'name': name, 'idList': column_list[0]['id'], **auth_params})
-    else:
+        print('Task has been added.')
+    elif len(column_list) > 1:
         counter = 0
         print('All lists with the same name:')
         for column in column_list:
@@ -78,6 +80,14 @@ def create_task(name, column_name):
         while answer_number not in range(1, len(column_list) + 1):
             answer_number = int(input('The list with this number is not exist, choose a correct number:\n'))
         requests.post(base_url.format('cards'), data={'name': name, 'idList': column_list[answer_number - 1]['id'], **auth_params})
+        print('Task has been added.')
+    else:
+        create_list(column_name)
+        column_data = requests.get(base_url.format('boards') + '/' + board_id + '/lists', params=auth_params).json()
+        for column in column_data:
+            if column['name'] == column_name:
+                requests.post(base_url.format('cards'), data={'name': name, 'idList': column['id'], **auth_params})
+        print('The task has been added.')
 
 def name_handler(name, component = 'list'):
     """
@@ -180,8 +190,10 @@ def move(name, column_name):
         while answer_number not in range(1, len(column_list) + 1):
             answer_number = int(input('Number of list is incorrect. Try again:\n'))
         requests.put(base_url.format('cards') + '/' + task_id + '/idList', data={'value': column_list[answer_number - 1]['id'], **auth_params})
+        print('The task has been moved.')
     elif len(column_list) == 1:
         requests.put(base_url.format('cards') + '/' + task_id + '/idList', data={'value': column_list[0]['id'], **auth_params})
+        print('The task has been moved.')
     else:
         print('List with those name is not exist')
 
